@@ -1,0 +1,20 @@
+.vertical-center {
+    min-height: 100vh;  
+    display: flex;
+    align-items: center;
+}
+
+.title-center {
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+}
+
+#raffled_number {
+    font-size: 3.5rem;
+}
+
+#historic_body {
+    height: 250px;
+    overflow-y: auto;
+}
