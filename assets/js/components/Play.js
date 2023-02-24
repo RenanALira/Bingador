@@ -4,6 +4,7 @@ import play from "../partials/play.js";
 import { createElement, getById } from "../helpers/dev.helper.js";
 import Configurations from "./Configurations.js";
 import History from "./History.js";
+import Timer from "./Timer.js";
 
 export default class Play {
     /**
@@ -13,14 +14,15 @@ export default class Play {
      * @param {Object} params Parâmetros de configuração do jogo.
      * @param {int} params.from Menor número do intervalo do sorteio.
      * @param {int} params.to Maior número do intervalo do sorteio.
+     * @param {int|false} params.seconds Intervalo de segundos em que o sorteio deve acontecer, caso deva sortear automaticamente.
      */
-    constructor(element, { from, to } = {}) {
+    constructor(element, { from, to, seconds = false } = {}) {
         this.element = element;
 
         this.element.innerHTML = play;
 
         this.params = {
-            from, to
+            from, to, seconds
         };
 
         this.numbers = this._generateNumbers();
@@ -39,7 +41,7 @@ export default class Play {
     }
 
     _createActionButtons() {
-        getById('btn_start').innerText = 'Sortear';
+        getById('btn_start').innerText = this.params.seconds > 0 ? 'Começar' : 'Sortear';
 
         this._createBackButton();
     }
@@ -62,7 +64,11 @@ export default class Play {
     _initListeners() {
         getById('btn_start')
             .addEventListener('click', () => {
-                this._raffleAndSplice(this.numbers);
+                if (this.params.seconds > 0) {
+                    this._startAutomatic();
+                } else {
+                    this._raffleAndSplice(this.numbers);
+                }
             });
 
         getById('btn_voltar')
@@ -76,6 +82,22 @@ export default class Play {
 
                 new Configurations(this.element);
             });
+    }
+
+    _startAutomatic() {
+        const timerElement = getById('seconds');
+        this.timer = new Timer(this.params.seconds, timerElement);
+
+        getById('time_counter').classList.remove('d-none');
+
+        this._raffleAndSplice(this.numbers);
+
+        timerElement
+            .addEventListener('timer.reset', () => {
+                this._raffleAndSplice(this.numbers);
+            });
+
+        this.timer.play();
     }
 
     _raffleAndSplice(numbers) {

@@ -21,6 +21,21 @@ export default class Configurations {
     }
 
     _initListeners() {
+        // Sumir e aparecer div de segundos
+        getById('switch_auto_raffle')
+            .addEventListener('change', function () {
+                let divInputSeconds = getById('seconds_to_raffle'),
+                    inputSeconds = divInputSeconds.querySelector('#input_seconds');
+
+                divInputSeconds.classList.add('d-none');
+                inputSeconds.value = 0;
+
+                if (this.checked) {
+                    divInputSeconds.classList.remove('d-none');
+                    inputSeconds.value = 30;
+                }
+            });
+
         // Iniciar o jogo
         getById('config_form')
             .addEventListener('submit', (event) => {
@@ -34,9 +49,10 @@ export default class Configurations {
                     }
 
                     const from = getById('input_from').value,
-                        to = getById('input_to').value;
+                        to = getById('input_to').value,
+                        seconds = getById('input_seconds').value;
 
-                    new Play(this.element, { from, to });
+                    new Play(this.element, { from, to, seconds });
                 } catch (e) {
                     Warnings.show(this.warnings_div, e);
                 }
