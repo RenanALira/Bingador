@@ -8,7 +8,7 @@ export default class Timer {
      * @param {HTMLElement} timerElement Elemento do timer.
      */
     constructor(seconds, timerElement) {
-        this.originalSeconds = this.currentSeconds = timerElement.innerText = seconds;
+        this.originalSeconds = this.currentSeconds = seconds;
         this.timerElement = timerElement;
 
         this.timeout;
@@ -19,24 +19,51 @@ export default class Timer {
      * Inicia o timer.
      */
     play() {
-        this.timeout = setTimeout(() => {
-            this.currentSeconds -= 1;
-            if (this.currentSeconds < 0) {
-                this.currentSeconds = this.originalSeconds;
+        if (this.status !== 'played') {
+            this.status = 'played';
 
-                this.timerElement.dispatchEvent(this.timerEvent);
-            }
-
-            this.timerElement.innerText = this.currentSeconds;
-            
-            this.play();
-        }, 1000);
+            this._controllerTimerSteps();
+        }
     }
 
     /**
-     * Pausa o timer;
+     * Pausa o timer.
      */
     pause() {
         clearTimeout(this.timeout);
+
+        this.status = 'paused';
+    }
+
+    /**
+     * Para o timer, resetando o tempo inicial.
+     */
+    stop() {
+        this.pause();
+
+        this.currentSeconds = this.originalSeconds;
+        this.timerElement.innerText = this.currentSeconds;
+
+        this.status = 'stopped';
+    }
+
+    /**
+     * Controla os passos do timer.
+     */
+    _controllerTimerSteps() {
+        if (this.status === 'played') {
+            this.timeout = setTimeout(() => {
+                this.currentSeconds -= 1;
+                if (this.currentSeconds < 1) {
+                    this.currentSeconds = this.originalSeconds;
+
+                    this.timerElement.dispatchEvent(this.timerEvent);
+                }
+
+                this.timerElement.innerText = this.currentSeconds;
+
+                this._controllerTimerSteps();
+            }, 1000);
+        }
     }
 }
