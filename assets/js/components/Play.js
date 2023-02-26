@@ -152,8 +152,8 @@ export default class Play {
                     this._validateRemainingNumbers();
 
                     if (this.isAutomatic) {
-                        // O primeiro número deve ser sorteado instantaneamente
-                        !this.timer.status && this._raffleAndSplice(this.numbers);
+                        // Se isPlaying ainda não foi definido, é o primeiro número e deve ser sorteado instantaneamente
+                        typeof this.timer.isPlaying === 'undefined' && this._raffleAndSplice(this.numbers);
 
                         this.timer.play();
 
