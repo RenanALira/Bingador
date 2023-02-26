@@ -43,14 +43,12 @@ export default class Configurations {
 
                 Warnings.hide(this.warnings_div);
 
-                try {
-                    if (!isValid()) {
-                        throw 'O valor inicial precisa ser menor que o final.';
-                    }
+                const from = getById('input_from').value,
+                    to = getById('input_to').value,
+                    seconds = getById('input_seconds').value;
 
-                    const from = getById('input_from').value,
-                        to = getById('input_to').value,
-                        seconds = getById('input_seconds').value;
+                try {
+                    this._validateConfigs(from, to, seconds);
 
                     new Play(this.element, { from, to, seconds });
                 } catch (e) {
@@ -58,16 +56,35 @@ export default class Configurations {
                 }
             });
     }
-}
 
-/**
- * Valida se o intervalo de números está válido.
- * 
- * @returns {boolean}
- */
-function isValid() {
-    let fromValue = getById('input_from').value,
-        toValue = getById('input_to').value;
+    /**
+     * Valida as configurações só de meme.
+     * 
+     * @param {integer} from 
+     * @param {integer} to 
+     * @param {integer} seconds
+     */
+    _validateConfigs(from, to, seconds) {
+        if (parseInt(to) < parseInt(from)) {
+            throw 'O valor inicial precisa ser menor que o final.';
+        }
+        
+        if (from < 0) {
+            throw 'Subzero aqui não!';
+        }
 
-    return parseInt(fromValue) < parseInt(toValue);
+        if (to > 1000) {
+            const messages = [
+                'Tá de sacanagem, né?',
+                'Que raio de cartela é isso?',
+                'É muito. Não deixo não.'
+            ];
+
+            throw `${to}? ` + messages[Math.floor(Math.random() * messages.length)];
+        }
+        
+        if (seconds > 60) {
+            throw 'Tudo isso de tempo? Vai esperar pra sempre!';
+        }
+    }
 }
