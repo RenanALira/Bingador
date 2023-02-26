@@ -5,6 +5,7 @@ import { createElement, getById } from "../helpers/dev.helper.js";
 import Configurations from "./Configurations.js";
 import History from "./History.js";
 import Timer from "./Timer.js";
+import Warnings from "./Warnings.js";
 
 export default class Play {
     /**
@@ -22,6 +23,7 @@ export default class Play {
         this.params = {
             from, to, seconds
         };
+        this.warnings_div = getById('warning');
 
         // Carrega o html
         this.element.innerHTML = play;
@@ -129,8 +131,8 @@ export default class Play {
         });
 
         stopButton.addEventListener('click', () => {
-                this.timer.stop();
-            });
+            this.timer.stop();
+        });
 
         return stopButton;
     }
@@ -146,26 +148,29 @@ export default class Play {
 
         getById('btn_start')
             .addEventListener('click', () => {
-                if (this._noRemainingNumbers()) {
-                    return;
+                try {
+                    this._validateRemainingNumbers();
+
+                    if (this.isAutomatic) {
+                        // O primeiro número deve ser sorteado instantaneamente
+                        !this.timer.status && this._raffleAndSplice(this.numbers);
+
+                        this.timer.play();
+
+                        return;
+                    }
+
+                    this._raffleAndSplice(this.numbers);
+                } catch (e) {
+                    Warnings.show(this.warnings_div, e);
                 }
-
-                if (this.isAutomatic) {
-                    // O primeiro número deve ser sorteado instantaneamente
-                    !this.timer.status && this._raffleAndSplice(this.numbers);
-
-                    this.timer.play();
-
-                    return;
-                }
-
-                this._raffleAndSplice(this.numbers);
             });
 
         getById('btn_voltar')
             .addEventListener('click', ({ currentTarget }) => {
                 currentTarget.remove();
                 History.destroy();
+                Warnings.hide(this.warnings_div);
 
                 this.timer && this.timer.stop();
 
@@ -194,8 +199,14 @@ export default class Play {
         return numbers;
     }
 
-    _noRemainingNumbers() {
-        return this.numbers.length < 1;
+    /**
+     * Valida se todos os números já foram sorteados.
+     */
+    _validateRemainingNumbers() {
+        if (this.numbers.length < 1) {
+            this.timer && this.timer.stop();
+            throw 'Todos os números já foram sorteados.';
+        }
     }
 
     /**
@@ -204,21 +215,20 @@ export default class Play {
      * @returns void caso todos os números já tenham sido sorteados.
      */
     _raffleAndSplice() {
-        if (this._noRemainingNumbers()) {
-            this.timer && this.timer.stop();
+        try {
+            this._validateRemainingNumbers();
 
-            alert('Todos os números foram sorteados');
-            return;
+            const raffledIndex = Math.floor(Math.random() * this.numbers.length),
+                raffledNumberDiv = getById('raffled_number');
+
+            raffledNumberDiv.innerText = this.numbers[raffledIndex];
+
+            History.addToHistory(this.numbers[raffledIndex]);
+
+            this.numbers.splice(raffledIndex, 1);
+        } catch (e) {
+            Warnings.show(this.warnings_div, e);
         }
-
-        const raffledIndex = Math.floor(Math.random() * this.numbers.length),
-            raffledNumberDiv = getById('raffled_number');
-
-        raffledNumberDiv.innerText = this.numbers[raffledIndex];
-
-        History.addToHistory(this.numbers[raffledIndex]);
-
-        this.numbers.splice(raffledIndex, 1);
     }
 
     /**
@@ -232,5 +242,6 @@ export default class Play {
         this.timer && this.timer.stop();
 
         History.clear();
+        Warnings.hide(this.warnings_div);
     }
 }
