@@ -230,5 +230,7 @@ export default class Play {
         getById('raffled_number').innerText = '_';
 
         this.timer && this.timer.stop();
+
+        History.clear();
     }
 }

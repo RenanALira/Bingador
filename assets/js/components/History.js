@@ -38,4 +38,11 @@ export default class History {
 
         getById('history_table').prepend(historyTr);
     }
+
+    /**
+     * Limpa o histórico.
+     */
+    static clear() {
+        getById('history_table').innerHTML = '';
+    }
 }
