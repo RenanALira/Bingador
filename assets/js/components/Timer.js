@@ -19,8 +19,8 @@ export default class Timer {
      * Inicia o timer.
      */
     play() {
-        if (!this.isPLaying) {
-            this.isPLaying = true;
+        if (!this.isPlaying) {
+            this.isPlaying = true;
 
             this._controllerTimerSteps();
         }
@@ -32,7 +32,7 @@ export default class Timer {
     pause() {
         clearTimeout(this.timeout);
 
-        this.isPLaying = false;
+        this.isPlaying = false;
     }
 
     /**
@@ -44,14 +44,14 @@ export default class Timer {
         this.currentSeconds = this.originalSeconds;
         this.timerElement.innerText = this.currentSeconds;
 
-        this.isPLaying = false;
+        this.isPlaying = false;
     }
 
     /**
      * Controla os passos do timer.
      */
     _controllerTimerSteps() {
-        if (this.isPLaying) {
+        if (this.isPlaying) {
             this.timeout = setTimeout(() => {
                 this.currentSeconds -= 1;
                 if (this.currentSeconds < 1) {
