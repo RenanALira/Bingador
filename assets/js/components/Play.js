@@ -17,37 +17,55 @@ export default class Play {
      * @param {int|false} params.seconds Intervalo de segundos em que o sorteio deve acontecer, caso deva sortear automaticamente.
      */
     constructor(element, { from, to, seconds = false } = {}) {
+        // Parâmetros de configuração
         this.element = element;
-
-        this.element.innerHTML = play;
-
         this.params = {
             from, to, seconds
         };
 
-        this.numbers = this._generateNumbers();
+        // Carrega o html
+        this.element.innerHTML = play;
 
+        // Propriedades do jogo
+        this.isAutomatic = seconds > 0;
+        this.numbers = this._generateNumbers();
         this.timer = false;
 
         this._init();
     }
 
+    /**
+     * Inicia as funções principais.
+     */
     _init() {
         new History(getById('div_history'));
 
+        // Se for automático, exibe e instancia o timer
+        if (this.isAutomatic) {
+            getById('seconds').innerText = this.params.seconds;
+            getById('time_counter').classList.remove('d-none');
+
+            this.timer = new Timer(this.params.seconds, getById('seconds'));
+        }
+
         this._createActionButtons();
-
-        this._initListeners();
     }
 
+    /**
+     * Cria os botões de ação do jogo e da página.
+     */
     _createActionButtons() {
-        getById('btn_start').innerText = this.params.seconds > 0 ? 'Começar' : 'Sortear';
+        // Botões do jogo
+        const gameActionsDiv = getById('div_game_actions');
+        gameActionsDiv.append(this._createStartButton());
 
-        this._createBackButton();
-    }
+        if (this.isAutomatic) {
+            gameActionsDiv.append(this._createPauseButton());
+            gameActionsDiv.append(this._createStopButton());
+        }
 
-    _createBackButton() {
-        getById('actions_div')
+        // Botão de Voltar da página
+        getById('div_page_actions')
             .prepend(
                 createElement(
                     'button',
@@ -59,16 +77,89 @@ export default class Play {
                     }
                 )
             );
+
+        this._initDefaultListeners();
     }
 
-    _initListeners() {
+    /**
+     * Cria o botão de start tanto manual quanto automático.
+     * 
+     * @returns HTMLElement
+     */
+    _createStartButton() {
+        return createElement('button', {
+            type: 'button',
+            classList: 'btn btn-primary ms-2',
+            id: 'btn_start',
+            innerHTML: this.isAutomatic ? '<i class="bi bi-play-fill"></i>' : '<i class="bi bi-shuffle"></i>'
+        });
+    }
+
+    /**
+     * Cria o botão de pause.
+     * 
+     * @returns HTMLElement
+     */
+    _createPauseButton() {
+        const pauseButton = createElement('button', {
+            type: 'button',
+            classList: 'btn btn-warning ms-2',
+            id: 'btn_pause',
+            innerHTML: '<i class="bi bi-pause-fill"></i>'
+        });
+
+        pauseButton.addEventListener('click', () => {
+            this.timer.pause();
+        });
+
+        return pauseButton;
+    }
+
+    /**
+     * Cria o botão de stop.
+     * 
+     * @returns HTMLElement
+     */
+    _createStopButton() {
+        const stopButton = createElement('button', {
+            type: 'button',
+            classList: 'btn btn-danger ms-2',
+            id: 'btn_stop',
+            innerHTML: '<i class="bi bi-stop-fill"></i>'
+        });
+
+        stopButton.addEventListener('click', () => {
+                this.timer.stop();
+            });
+
+        return stopButton;
+    }
+
+    /**
+     * Inicia os listeners dos botões.
+     */
+    _initDefaultListeners() {
+        getById('btn_restart')
+            .addEventListener('click', () => {
+                this._resetGame();
+            });
+
         getById('btn_start')
             .addEventListener('click', () => {
-                if (this.params.seconds > 0) {
-                    this._startAutomatic();
-                } else {
-                    this._raffleAndSplice(this.numbers);
+                if (this._noRemainingNumbers()) {
+                    return;
                 }
+
+                if (this.isAutomatic) {
+                    // O primeiro número deve ser sorteado instantaneamente
+                    !this.timer.status && this._raffleAndSplice(this.numbers);
+
+                    this.timer.play();
+
+                    return;
+                }
+
+                this._raffleAndSplice(this.numbers);
             });
 
         getById('btn_voltar')
@@ -76,44 +167,15 @@ export default class Play {
                 currentTarget.remove();
                 History.destroy();
 
-                if (this.timer) {
-                    this.timer.pause();
-                }
+                this.timer && this.timer.stop();
 
                 new Configurations(this.element);
             });
-    }
 
-    _startAutomatic() {
-        const timerElement = getById('seconds');
-        this.timer = new Timer(this.params.seconds, timerElement);
-
-        getById('time_counter').classList.remove('d-none');
-
-        this._raffleAndSplice(this.numbers);
-
-        timerElement
+        getById('seconds')
             .addEventListener('timer.reset', () => {
-                this._raffleAndSplice(this.numbers);
+                this._raffleAndSplice();
             });
-
-        this.timer.play();
-    }
-
-    _raffleAndSplice(numbers) {
-        if (numbers.length < 1) {
-            alert('Todos os números foram sorteados');
-            return;
-        }
-
-        const raffledIndex = Math.floor(Math.random() * numbers.length),
-            raffledNumberDiv = getById('raffled_number');
-
-        raffledNumberDiv.innerText = numbers[raffledIndex];
-
-        History.addToHistory(numbers[raffledIndex]);
-
-        numbers.splice(raffledIndex, 1);
     }
 
     /**
@@ -130,5 +192,43 @@ export default class Play {
         }
 
         return numbers;
+    }
+
+    _noRemainingNumbers() {
+        return this.numbers.length < 1;
+    }
+
+    /**
+     * Sorteia um número do array de números e remove seu índice para que não haja repetições.
+     *
+     * @returns void caso todos os números já tenham sido sorteados.
+     */
+    _raffleAndSplice() {
+        if (this._noRemainingNumbers()) {
+            this.timer && this.timer.stop();
+
+            alert('Todos os números foram sorteados');
+            return;
+        }
+
+        const raffledIndex = Math.floor(Math.random() * this.numbers.length),
+            raffledNumberDiv = getById('raffled_number');
+
+        raffledNumberDiv.innerText = this.numbers[raffledIndex];
+
+        History.addToHistory(this.numbers[raffledIndex]);
+
+        this.numbers.splice(raffledIndex, 1);
+    }
+
+    /**
+     * Reseta o sorteador;
+     */
+    _resetGame() {
+        this.numbers = this._generateNumbers();
+
+        getById('raffled_number').innerText = '_';
+
+        this.timer && this.timer.stop();
     }
 }

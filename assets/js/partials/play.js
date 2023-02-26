@@ -1,14 +1,28 @@
 let gameForm;
 export default gameForm = /*html*/`
     <form id="game_form">
-        <h3 class="title-center mb-0">Número sorteado:</h3>
-        <div class="d-flex justify-content-center align-items-baseline mb-2">
-            <span class="fw-bold me-2" id="raffled_number">_</span>
-            <span class="text-muted d-none" id="time_counter">
-                (<span id="seconds"></span>s)
-            </span>
+        <div class="row">
+            <div class="col-12">
+                <h3 class="title-center mb-0">Número sorteado:</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-baseline">
+                    <span class="fw-bold" id="raffled_number">_</span>
+                    <span class="text-muted ms-2 d-none" id="time_counter">
+                        (<span id="seconds"></span>s)
+                    </span>
+                </div>
+            </div>
         </div>
 
-        <button type="button" class="btn btn-primary fw-bold w-100" id="btn_start"></button>
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-center" id="div_game_actions">
+                    <button type="button" class="btn btn-secondary" id="btn_restart"><i class="bi bi-arrow-counterclockwise"></i></button>
+                </div>
+            </div>            
+        </div>
     </form>
 `;
