@@ -50,7 +50,8 @@ export default class History {
      */
     static addToHistory(numberToInsert) {
         let historyItem = createElement('div', { classList: 'history-item' }),
-            historyItemsCount = document.querySelectorAll('#div_history_items div.history-item').length;
+            historyItemsCount = document.querySelectorAll('#div_history_items div.history-item').length,
+            inputSearch = getById('input_search_numbers');
 
         historyItem.innerHTML = /*html*/`
             <h4>${numberToInsert}</h4>
@@ -58,7 +59,10 @@ export default class History {
         `;
 
         getById('div_history_items').append(historyItem);
-        getById('input_search_numbers').dispatchEvent(new Event('input'));
+
+        if (inputSearch.value !== '') {
+            inputSearch.dispatchEvent(new Event('input'));
+        }
     }
 
     /**
