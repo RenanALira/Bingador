@@ -13,6 +13,30 @@ export default class History {
         this.element = element;
 
         this.element.innerHTML = history;
+
+        this._initSearchListener();
+    }
+
+    _initSearchListener() {
+        getById('input_search_numbers')
+            .addEventListener('input', ({ currentTarget }) => {
+                const searchedNumber = currentTarget.value,
+                    historyItems = document.getElementsByClassName('history-item');
+
+                for (let historyItem of historyItems) {
+                    const classes = ['not-found', 'found'];
+
+                    historyItem.classList.remove(classes[0], classes[1]);
+
+                    if (searchedNumber !== '') {
+                        const foundNumberCondition = searchedNumber === historyItem.querySelector('h4').innerText;
+
+                        historyItem.classList.add(classes[+foundNumberCondition]);
+
+                        foundNumberCondition && historyItem.scrollIntoView();
+                    }
+                }
+            });
     }
 
     static destroy() {
@@ -25,24 +49,23 @@ export default class History {
      * @param {integer} numberToInsert Número a ser inserido.
      */
     static addToHistory(numberToInsert) {
-        let historyTr = createElement('tr'),
-            historySequenceTd = createElement('td'),
-            historyNumberTd = createElement('td'),
-            insertedRowsCount = document.querySelectorAll('#history_table tr').length;
+        let historyItem = createElement('div', { classList: 'history-item' }),
+            historyItemsCount = document.querySelectorAll('#div_history_items div.history-item').length;
 
-        historySequenceTd.innerText = `${insertedRowsCount + 1}º`;
-        historyNumberTd.innerText = numberToInsert;
+        historyItem.innerHTML = /*html*/`
+            <h4>${numberToInsert}</h4>
+            <small>${historyItemsCount + 1}º</small>
+        `;
 
-        historyTr.append(historySequenceTd);
-        historyTr.append(historyNumberTd);
-
-        getById('history_table').prepend(historyTr);
+        getById('div_history_items').append(historyItem);
+        getById('input_search_numbers').dispatchEvent(new Event('input'));
     }
 
     /**
      * Limpa o histórico.
      */
     static clear() {
-        getById('history_table').innerHTML = '';
+        getById('div_history_items').innerHTML = '';
+        getById('input_search_numbers').value = '';
     }
 }
