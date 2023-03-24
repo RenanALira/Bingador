@@ -7,15 +7,14 @@ export default history = /*html*/`
                     Histórico
                 </button>
             </h2>
-            <div id="heading" class="accordion-collapse collapse" aria-labelledby="history" data-bs-parent="#accordionFlushExample">
+            <div id="heading" class="accordion-collapse collapse" aria-labelledby="history">
                 <div class="accordion-body" id="history_body">
-                    <table class="table table-striped">
-                        <thead>
-                            <th scope="col">Ordem</th>
-                            <th scope="col">Nº sorteado</th>
-                        </thead>
-                        <tbody id="history_table"></tbody>
-                    </table>
+                    <div class="d-grid justify-content-start p-2">
+                        <input type="text" id="input_search_numbers" class="form-control" placeholder="Busque números">
+                    </div>
+                    <div id="div_history_items">
+                        <!-- Itens de histórico serão adicionados aqui -->
+                    </div>
                 </div>
             </div>
         </div>
