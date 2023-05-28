@@ -27,19 +27,10 @@ export default class Timer {
     }
 
     /**
-     * Pausa o timer.
-     */
-    pause() {
-        clearTimeout(this.timeout);
-
-        this.isPlaying = false;
-    }
-
-    /**
      * Para o timer, resetando o tempo inicial.
      */
     stop() {
-        this.pause();
+        clearTimeout(this.timeout);
 
         this.currentSeconds = this.originalSeconds;
         this.timerElement.innerText = this.currentSeconds;
