@@ -233,6 +233,8 @@ export default class Play {
 
         this.timer && document.getElementById('btn_stop').click();
 
+        delete this.timer.isPlaying;
+
         History.clear();
         Warnings.hide(this.warnings_div);
     }
