@@ -62,7 +62,6 @@ export default class Play {
         gameActionsDiv.append(this._createStartButton());
 
         if (this.isAutomatic) {
-            gameActionsDiv.append(this._createPauseButton());
             gameActionsDiv.append(this._createStopButton());
         }
 
@@ -89,32 +88,17 @@ export default class Play {
      * @returns HTMLElement
      */
     _createStartButton() {
+        let buttonHtml = '<i class="bi bi-shuffle"></i> Sortear';
+        if (this.isAutomatic) {
+            buttonHtml = '<i class="bi bi-play-fill"></i> Iniciar';
+        }
+
         return createElement('button', {
             type: 'button',
             classList: 'btn btn-primary ms-2',
             id: 'btn_start',
-            innerHTML: this.isAutomatic ? '<i class="bi bi-play-fill"></i>' : '<i class="bi bi-shuffle"></i>'
+            innerHTML: buttonHtml
         });
-    }
-
-    /**
-     * Cria o botão de pause.
-     * 
-     * @returns HTMLElement
-     */
-    _createPauseButton() {
-        const pauseButton = createElement('button', {
-            type: 'button',
-            classList: 'btn btn-warning ms-2',
-            id: 'btn_pause',
-            innerHTML: '<i class="bi bi-pause-fill"></i>'
-        });
-
-        pauseButton.addEventListener('click', () => {
-            this.timer.pause();
-        });
-
-        return pauseButton;
     }
 
     /**
@@ -125,13 +109,17 @@ export default class Play {
     _createStopButton() {
         const stopButton = createElement('button', {
             type: 'button',
-            classList: 'btn btn-danger ms-2',
+            classList: 'btn btn-danger ms-2 d-none',
             id: 'btn_stop',
-            innerHTML: '<i class="bi bi-stop-fill"></i>'
+            innerHTML: '<i class="bi bi-stop-fill"></i> Parar'
         });
 
-        stopButton.addEventListener('click', () => {
+        stopButton.addEventListener('click', ({ currentTarget }) => {
             this.timer.stop();
+
+            document.getElementById('btn_start').classList.remove('d-none');
+
+            currentTarget.classList.add('d-none');
         });
 
         return stopButton;
@@ -147,7 +135,7 @@ export default class Play {
             });
 
         getById('btn_start')
-            .addEventListener('click', () => {
+            .addEventListener('click', ({ currentTarget }) => {
                 try {
                     this._validateRemainingNumbers();
 
@@ -156,6 +144,10 @@ export default class Play {
                         typeof this.timer.isPlaying === 'undefined' && this._raffleAndSplice(this.numbers);
 
                         this.timer.play();
+
+                        document.getElementById('btn_stop').classList.remove('d-none');
+
+                        currentTarget.classList.add('d-none');
 
                         return;
                     }

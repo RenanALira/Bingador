@@ -20,7 +20,7 @@ export default gameForm = /*html*/`
         <div class="row mt-2">
             <div class="col-12">
                 <div class="d-flex justify-content-center" id="div_game_actions">
-                    <button type="button" class="btn btn-secondary" id="btn_restart"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    <button type="button" class="btn btn-secondary" id="btn_restart"><i class="bi bi-arrow-counterclockwise"></i> Reiniciar</button>
                 </div>
             </div>            
         </div>
